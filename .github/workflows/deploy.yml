@@ -1,0 +1,27 @@
+name: Deploy to HuggingFace
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Configure Git
+        run: |
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+
+      - name: Push to HuggingFace
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          git remote add hf https://${{ vars.HF_USERNAME || github.repository_owner }}:${HF_TOKEN}@huggingface.co/spaces/${{ vars.HF_USERNAME || github.repository_owner }}/${{ vars.HF_SPACE_NAME || 'hfclaw' }}
+          git push hf main --force
